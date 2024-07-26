@@ -1,0 +1,18 @@
+##############################################################################
+#
+# Name: pyproject.toml
+#
+# Function:
+#       Stub pyproject.toml: see https://pybit.es/articles/how-to-package-and-deploy-cli-apps/
+#
+# Copyright notice and license:
+#       See LICENSE.md
+#
+# Author:
+#       Terry Moore
+#
+##############################################################################
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools", "wheel"]
