@@ -304,3 +304,11 @@ class Aep():
         else:
             logging.info("set remoteAccess collection")
             return self.set_collection("remoteAccess", newValue=data)
+
+    def save(self):
+        logging.info("save gateway state")
+        return self.command("save")
+
+    def restart(self):
+        logging.info("reboot gateway (this takes a while)")
+        return self.command("restart")
