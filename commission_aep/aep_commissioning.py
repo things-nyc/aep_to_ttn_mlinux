@@ -1,9 +1,9 @@
 ##############################################################################
 #
-# Name: aep.py
+# Name: aep_commissioning.py
 #
 # Function:
-#       Toplevel Aep() class, provides APIs for talking to
+#       Toplevel AepCommissioning() class, provides APIs for talking to
 #       a controlled Conduit.
 #
 # Copyright notice and license:
@@ -27,11 +27,11 @@ from .constants import Constants
 
 ##############################################################################
 #
-# The AEP Config API
+# The AEP Commissioning API
 #
 ##############################################################################
 
-class Aep():
+class AepCommissioning():
     def __init__(self, options: Any):
         self.options = options
         self.session = requests.Session()
@@ -40,7 +40,7 @@ class Aep():
         pass
 
     class Error(Exception):
-        """ this is the Exception thrown for AEP errors """
+        """ this is the Exception thrown for AEP Commissioning errors """
         pass
 
     def _do_get(self, description: str, url: str) -> dict:

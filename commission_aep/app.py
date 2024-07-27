@@ -27,7 +27,7 @@ Union = typing.Union
 
 from .constants import Constants
 from .__version__ import __version__
-from .aep import Aep
+from .aep_commissioning import AepCommissioning
 
 ##############################################################################
 #
@@ -73,7 +73,7 @@ class App():
     ##########################################################################
 
     def _initialize(self):
-        self.aep = Aep(self.args)
+        self.aep = AepCommissioning(self.args)
         pass
 
     ##########################################################################
