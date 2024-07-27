@@ -206,6 +206,10 @@ class App():
 
         # get the remote access state
         remoteAccess = aep.remoteAccess()
+        if not remoteAccess:
+            logging.error("could not read remoteAccess object")
+            return False
+
         logging.debug("remoteAccess: %s", remoteAccess)
 
         sshChangeNeeded = self.need_ssh_change(remoteAccess)
