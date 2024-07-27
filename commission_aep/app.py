@@ -46,9 +46,10 @@ class App():
         options = self._parse_arguments()
         self.args = options
 
-        logger = logging.getLogger()
-        logger.handlers = []
-        logger.addHandler(logging.StreamHandler())
+        logging.basicConfig()
+        logger = logging.getLogger(__name__)
+        #logger.handlers = []
+        #logger.addHandler(logging.StreamHandler())
         if options.debug:
             logger.setLevel('DEBUG')
         elif options.verbose:
@@ -56,13 +57,13 @@ class App():
         else:
             logger.setLevel('WARNING')
 
-        self.log = logger
+        self.logger = logger
 
         # verbose: report the version.
-        self.log.info("commission_aep v%s", __version__)
+        logger.info("commission_aep v%s", __version__)
 
         self._initialize()
-        self.log.info("App is initialized")
+        logger.info("App is initialized")
         return
 
     ##########################################################################
@@ -156,6 +157,7 @@ class App():
     def set_password(self) -> bool:
         aep = self.aep
         options = self.args
+        logger = self.logger
 
         # prime the pump
         # if this fails, we assume it's already commissioned
@@ -180,20 +182,20 @@ class App():
                 data["aasID"] = commissioning["aasID"]
             commissioning = aep.set_commissioning(data)
             if not commissioning:
-                logging.warning("set_commissioning failed")
+                logger.warning("set_commissioning failed")
                 return False
 
             if "aasType" in commissioning:
                 aas_type = commissioning["aas_type"]
                 aas_msg = commissioning["aas_msg"]
                 if aas_type == "error":
-                    logging.error("commissioning error: %s", aas_msg)
+                    logger.error("commissioning error: %s", aas_msg)
                     return False
                 elif aas_type == "info":
-                    logging.warning("%s", aas_msg)
+                    logger.warning("%s", aas_msg)
 
         # if we get here, we succeeded
-        logging.info("username and password successfully set")
+        logger.info("username and password successfully set")
         return True
 
     #######################################################
@@ -202,6 +204,7 @@ class App():
     def enable_ssh(self) -> bool:
         aep = self.aep
         options = self.args
+        logger = self.logger
 
         if not aep.login():
             return False
@@ -210,21 +213,21 @@ class App():
         result = aep.revert()
 
         if not result:
-            logging.error("revert failed")
+            logger.error("revert failed")
             return False
 
         # get the remote access state
         remoteAccess = aep.remoteAccess()
         if not remoteAccess:
-            logging.error("could not read remoteAccess object")
+            logger.error("could not read remoteAccess object")
             return False
 
-        logging.debug("remoteAccess: %s", remoteAccess)
+        logger.debug("remoteAccess: %s", remoteAccess)
 
         sshChangeNeeded = self.need_ssh_change(remoteAccess)
 
         if not sshChangeNeeded:
-            logging.info("ssh already enabled")
+            logger.info("ssh already enabled")
             if options.force:
                 sshChangeNeeded = True
 
@@ -238,20 +241,20 @@ class App():
             if not options.noop:
                 result = aep.remoteAccess(remoteAccess)
                 if result == None:
-                    logging.error("failed to set ssh in remoteAccess")
+                    logger.error("failed to set ssh in remoteAccess")
                     return False
 
                 result = aep.save()
                 if result == None:
-                    logging.error("failed to save state")
+                    logger.error("failed to save state")
                     return False
 
                 result = aep.restart()
                 if result == None:
-                    logging.error("failed to trigger a reboot")
+                    logger.error("failed to trigger a reboot")
                     return False
             else:
-                logging.info("skipping update of remoteAccess")
+                logger.info("skipping update of remoteAccess")
 
         # Success!
         return True

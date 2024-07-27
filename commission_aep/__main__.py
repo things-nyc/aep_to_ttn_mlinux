@@ -35,16 +35,16 @@ def main_inner() -> int:
         print("app creation failed:", e)
         raise
 
-    gApp.log.debug("launching app")
+    gApp.logger.debug("launching app")
     return gApp.run()
 
 def main() -> int:
     try:
         result = main_inner()
         if result != 0:
-            gApp.log.error("failure, exit with status %d", result)
+            gApp.logger.error("failure, exit with status %d", result)
         else:
-            gApp.log.info("success, exit with status 0")
+            gApp.logger.info("success, exit with status 0")
         return result
     except KeyboardInterrupt:
         print("Exited due to keyboard interrupt")
