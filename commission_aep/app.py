@@ -141,22 +141,68 @@ class App():
         else:
             return True
 
-    #################################
-    # Run the app and return status #
-    #################################
-    def run(self) -> int:
+    ################
+    # Set password #
+    ################
+    def set_password(self) -> bool:
+        aep = self.aep
+        options = self.args
+
+        # prime the pump
+        # if this fails, we assume it's already commissioned
+        commissioning = aep.get_commissioning()
+        if not commissioning:
+            return True
+
+        # if disabled, give up.
+        if options.noop:
+            return True
+
+        # set up the data blob we'll be passing.
+        data = {
+            "username": options.username,
+            "aasID": ""
+        }
+
+        # set the username, set the password, then confirm the password.
+        for password in ["", options.password, options.password]:
+            data["aasAnswer"] = password
+            if "aasID" in commissioning:
+                data["aasID"] = commissioning["aasID"]
+            commissioning = aep.set_commissioning(data)
+            if not commissioning:
+                logging.warning("set_commissioning failed")
+                return False
+
+            if "aasType" in commissioning:
+                aas_type = commissioning["aas_type"]
+                aas_msg = commissioning["aas_msg"]
+                if aas_type == "error":
+                    logging.error("commissioning error: %s", aas_msg)
+                    return False
+                elif aas_type == "info":
+                    logging.warning("%s", aas_msg)
+
+        # if we get here, we succeeded
+        logging.info("username and password successfully set")
+        return True
+
+    #######################################################
+    # Enable SSH (assuming username and password are set) #
+    #######################################################
+    def enable_ssh(self) -> bool:
         aep = self.aep
         options = self.args
 
         if not aep.login():
-            return 1
+            return False
 
         # restore to previous save
         result = aep.revert()
 
         if not result:
             logging.error("revert failed")
-            return 1
+            return False
 
         # get the remote access state
         remoteAccess = aep.remoteAccess()
@@ -180,22 +226,39 @@ class App():
                 result = aep.remoteAccess(remoteAccess)
                 if result == None:
                     logging.error("failed to set ssh in remoteAccess")
-                    return 1
+                    return False
 
                 result = aep.save()
                 if result == None:
                     logging.error("failed to save state")
-                    return 1
+                    return False
 
                 result = aep.restart()
                 if result == None:
                     logging.error("failed to trigger a reboot")
-                    return 1
+                    return False
             else:
                 logging.info("skipping update of remoteAccess")
 
-        # save the settings
+        # Success!
+        return True
+
+    #################################
+    # Run the app and return status #
+    #################################
+    def run(self) -> int:
+        aep = self.aep
+        options = self.args
+
+        if not options.nopass:
+            if not self.set_password():
+                return 1
+
+        if not self.enable_ssh():
+            return 1
+
         return 0
+
 
 ##############################################################################
 #
@@ -254,24 +317,14 @@ class Aep():
 
         return result
 
-    def login(self) -> Any:
-        logging.info("log in")
-        if self.token != None:
-            return True
-        options = self.options
-        url = f"{self.url}login?username={options.username}&password={options.password}"
-        result = self._do_get("logging in", url)
-        if 'result' in result and 'token' in result['result']:
-            self.token = result['result']['token']
-            return True
-        logging.error("login failed: %s", result)
-        return False
+    def get_api_url_no_token(self, param: str) -> str:
+        return f"{self.url}{param}"
 
-    def get_api_url(self, param: str) -> str:
+    def get_api_url_with_token(self, param: str) -> str:
         return f"{self.url}{param}?token={self.token}"
 
     def get_collection(self, param: str) -> Union[typing.Dict, None]:
-        url = self.get_api_url(param)
+        url = self.get_api_url_with_token(param)
 
         result = self._do_get("get collection", url=url)
         if 'result' in result:
@@ -280,13 +333,13 @@ class Aep():
 
     def set_collection(self, param: str, newValue: dict) -> Union[typing.Dict, None]:
         """ set a collection named param """
-        url = self.get_api_url(param)
+        url = self.get_api_url_with_token(param)
         result = self._do_put(f"set collection {param}", url=url, data=newValue)
         return result
 
     def command(self, command: str, /, data:Any=None) -> Union[typing.Dict, None]:
         """ execute a command named 'command' """
-        url = self.get_api_url(f"command/{command}")
+        url = self.get_api_url_with_token(f"command/{command}")
         if data == None:
             result = self._do_post(f"do_command {command}", url=url)
         else:
@@ -317,3 +370,50 @@ class Aep():
     def restart(self):
         logging.info("reboot gateway (this takes a while)")
         return self.command("restart")
+
+    # login does not use token, so is special, calls _do_get()
+    # directly.
+    def login(self) -> bool:
+        logging.info("log in")
+        if self.token != None:
+            return True
+        options = self.options
+        url = f"{self.url}login?username={options.username}&password={options.password}"
+        result = self._do_get("logging in", url)
+        if 'result' in result and 'token' in result['result']:
+            self.token = result['result']['token']
+            return True
+        logging.error("login failed: %s", result)
+        return False
+
+    # get commissioning does not use token or user name,
+    # so is special like login
+    def get_commissioning(self) -> Union[typing.Dict, None]:
+        logging.info("get commissioning info")
+        if self.token != None:
+            logging.error("already logged in")
+            return None
+
+        url = self.get_api_url_no_token("commissioning")
+        result = self._do_get("fetch commissioning data", url)
+
+        if 'error' in result:
+            return None
+        else:
+            return result
+
+    # set commissioning does not use token or user name,
+    # so is special
+    def set_commissioning(self, /, data: dict) -> Union[typing.Dict, None]:
+        logging.info("set comissioning info")
+        if self.token != None:
+            logging.error("already logged in")
+            return None
+
+        url = self.get_api_url_no_token("commissioning")
+        result = self._do_post("set commissioning info", url, data=data)
+
+        if 'error' in result:
+            return None
+        else:
+            return result
