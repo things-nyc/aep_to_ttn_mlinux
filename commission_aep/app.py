@@ -279,7 +279,7 @@ class Aep():
         pass
 
     class Error(Exception):
-        """ this is the Exception thrown for tracker errors """
+        """ this is the Exception thrown for AEP errors """
         pass
 
     def _do_get(self, description: str, url: str) -> dict:
