@@ -106,7 +106,7 @@ class App():
                         dest="verbose", default=False,
                         action='store_true',
                         help="print verbose messages")
-        group.add_argument("-n", "--noop",
+        group.add_argument("-n", "--noop", "--dry-run",
                         dest="noop", default=False,
                         action='store_true',
                         help="Don't make changes, just list what we are going to do")
