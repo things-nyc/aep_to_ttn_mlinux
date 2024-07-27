@@ -102,10 +102,6 @@ class App():
                         dest="noop", default=False,
                         action='store_true',
                         help="Don't make changes, just list what we are going to do")
-        group.add_argument("-f", "--force",
-                        dest="force", default=False,
-                        action='store_true',
-                        help="forcibly update the ssh setting and reboot, even if already set")
 
         #	Options
         group = parser.add_argument_group("Configuration options")
@@ -118,6 +114,10 @@ class App():
         group.add_argument("--address", "-A",
                         dest="address", default="192.168.2.1",
                         help="IP address of the conduit being commissioned (default %(default)s)")
+        group.add_argument("-f", "--force",
+                        dest="force", default=False,
+                        action='store_true',
+                        help="forcibly update the ssh setting and reboot, even if already set")
 
         options = parser.parse_args()
         if options.debug:
