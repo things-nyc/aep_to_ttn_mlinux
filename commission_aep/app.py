@@ -17,7 +17,6 @@
 from __future__ import print_function
 import argparse
 import logging
-import requests
 import sys
 import typing
 import urllib3
