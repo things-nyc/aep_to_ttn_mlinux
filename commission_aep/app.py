@@ -82,7 +82,10 @@ class App():
     ##########################################################################
 
     def _parse_arguments(self):
-        parser = argparse.ArgumentParser(description="Set up and enable sshd on Conduit AEP using the configuration API")
+        parser = argparse.ArgumentParser(
+            prog="commission_aep",
+            description="Set up and enable sshd on Conduit AEP using the configuration API"
+            )
 
         #	Debugging
         group = parser.add_argument_group("Debugging options")
@@ -102,6 +105,12 @@ class App():
                         dest="noop", default=False,
                         action='store_true',
                         help="Don't make changes, just list what we are going to do")
+        parser.add_argument(
+                        "--version",
+                        action='version',
+                        help="Print version and exit",
+                        version="%(prog)s v"+__version__
+                        )
 
         #	Options
         group = parser.add_argument_group("Configuration options")
