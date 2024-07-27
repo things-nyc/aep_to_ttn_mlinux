@@ -118,6 +118,11 @@ class App():
                         dest="force", default=False,
                         action='store_true',
                         help="forcibly update the ssh setting and reboot, even if already set")
+        group.add_argument("--skip-password", "-S",
+                        dest="nopass", default=False,
+                        action='store_true',
+                        help="Assume username and password are already set"
+                        )
 
         options = parser.parse_args()
         if options.debug:
