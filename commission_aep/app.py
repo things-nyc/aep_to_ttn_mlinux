@@ -145,14 +145,14 @@ class App():
 
         if not aep.login():
             return 1
-        
+
         # restore to previous save
         result = aep.revert()
 
         if not result:
             logging.error("revert failed")
             return 1
-        
+
         # get the remote access state
         remoteAccess = aep.remoteAccess()
         logging.debug("remoteAccess: %s", remoteAccess)
@@ -176,12 +176,12 @@ class App():
                 if result == None:
                     logging.error("failed to set ssh in remoteAccess")
                     return 1
-                
+
                 result = aep.save()
                 if result == None:
                     logging.error("failed to save state")
                     return 1
-                
+
                 result = aep.restart()
                 if result == None:
                     logging.error("failed to trigger a reboot")
