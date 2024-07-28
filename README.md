@@ -112,12 +112,29 @@ python3 -m aep_to_ttn_mlinux --help
 
 ## Run the script
 
+Boot up the AEP gateway, and connect its networking port to your USB Ethernet adapter.
+
 ```bash
 # make sure you've activated the venv, then:
 python -m aep_to_ttn_mlinux --password choose-a-passw0rd --verbose
 ```
 
 We normally use a different password than `choose-a-passw0rd`. Note that AEP wants a password containing lower case letters, digits, and punctuation.
+
+If the Conduit has not already been given an administrative login and password, this script will set them (using the values of --username and --password).
+
+The script then uses the commissioning API to enable SSH (if not already enabled.)
+When enabling ssh, a reboot is forced, and the script waits for the reboot
+to complete.
+
+Then the script uses ssh to download the appropriate image for the
+Conduit being configured.
+
+Finally, the script triggers a firmware update.
+
+The script does not wait for the firmware update to complete.
+
+Thus, you'll normally observe two reboots of the Conduit -- the first time to enable SSH, and the second time to do the firmware update.
 
 ## Setting up VRFs to allow configuring gateways in parallel
 
