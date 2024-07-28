@@ -137,10 +137,18 @@ class App():
                         action='store_true',
                         help="Assume username and password are already set"
                         )
+        group.add_argument("--product-type",
+                        dest="product_type", default=None,
+                        help="default product type, normally mtcdt or mtcap; default: read from device"
+                        )
+        group.add_argument("--product-id",
+                        dest="product_id", default=None,
+                        help="full product ID, normally mctdt-l4n1-247a or similar; default: read from device"
+                        )
         # https://ttni.tech/mlinux/images/mtcdt/5.3.31/ttni-base-image-mtcdt-upgrade.bin
         group.add_argument("--image",
-                        dest="image_file", default="/tmp/ttni-base-image-mtcdt-upgrade.bin",
-                        help="path to image to be downloaded"
+                        dest="image_file", default="/tmp/ttni-base-image-{product_type}-upgrade.bin",
+                        help="path to image to be downloaded; use {product_type} to insert the product type dynamically. Default: %(default)s"
                         )
         group.add_argument("--reboot_time",
                         dest="reboot_time", default=5*60,
@@ -231,6 +239,42 @@ class App():
             logger.error("revert failed")
             return False
 
+        # get the system properties
+        systemObject = aep.systemObject()
+        if not systemObject:
+            logger.error("could not read system object")
+            return False
+
+        logger.debug("system: %s", systemObject)
+
+        # get the product ID
+        if not "productId" in systemObject:
+            logger.error("no systemObject.productId")
+            return False
+
+        # extract the major/minor parts
+        productId = systemObject["productId"].casefold()
+        productType = productId.partition('-')[0]
+        logger.info("Conduit ID: %s; Conduit type: %s", productId, productType)
+
+        if options.product_type == None:
+            logger.debug("options.product_type set to %s", productType)
+            options.product_type = productType
+        elif options.product_type.casefold() == productType:
+            options.product_type = productType # in case of case folding
+        else:
+            logger.error("product_type doesn't match: %s != %s", options.product_type, productType)
+            return False
+
+        if options.product_id == None:
+            logger.debug("options.product_id set to %s", productId)
+            options.product_id = productId
+        elif options.product_id.casefold() == productId:
+            options.product_id = productId # in case of case folding
+        else:
+            logger.error("product_id doesn't match: %s != %s", options.product_id, productId)
+            return False
+
         # get the remote access state
         remoteAccess = aep.remoteAccess()
         if not remoteAccess:
@@ -289,7 +333,7 @@ class App():
     def copy_image(self) -> bool:
         c = self.ssh.connection
         options = self.args
-        infile = pathlib.Path(options.image_file)
+        infile = pathlib.Path(options.image_file.format(product_type=options.product_type))
         logger = self.logger
 
         if not infile.exists():

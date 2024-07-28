@@ -132,6 +132,14 @@ class AepCommissioning():
             self.logger.info("set remoteAccess collection")
             return self.set_collection("remoteAccess", newValue=data)
 
+    def systemObject(self, /, data: Union[typing.Dict, None] = None) -> Union[typing.Dict, None]:
+        if data == None:
+            self.logger.info("get system collection")
+            return self.get_collection("system")
+        else:
+            self.logger.info("set system collection")
+            return self.set_collection("system", newValue=data)
+
     def save(self):
         self.logger.info("save gateway state")
         return self.command("save")
