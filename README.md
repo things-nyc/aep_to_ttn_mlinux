@@ -1,6 +1,6 @@
-# `configure_aep`
+# `aep_to_ttn_mlinux`
 
-`configure_aep` is used to configure a MultiTech Conduit with AEP firmware that is in commissioning mode. It configures the Conduit for use with the IthacaThings administration system by Jeff Honig.
+`aep_to_ttn_mlinux` is used to configure a MultiTech Conduit with AEP firmware that is in commissioning mode. It configures the Conduit for use with the IthacaThings administration system by Jeff Honig.
 
 <!-- TOC depthfrom:2 updateonsave:true -->
 
