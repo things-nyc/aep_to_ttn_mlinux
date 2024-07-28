@@ -138,13 +138,13 @@ class App():
         #	Options
         group = parser.add_argument_group("Configuration options")
         group.add_argument("--username", "--user", "-U",
-                        dest="username", default="mtadm",
+                        dest="username", default=Constants.DEFAULT_AEP_USERNAME,
                         help="Username to use to connect (default %(default)s).")
         group.add_argument("--password", "--pass", "-P",
                         dest="password", required=True,
                         help="Password to use to connect. There is no default; this must always be supplied.")
         group.add_argument("--address", "-A",
-                        dest="address", default="192.168.2.1",
+                        dest="address", default=Constants.DEFAULT_IP,
                         help="IP address of the conduit being commissioned (default %(default)s).")
         group.add_argument("-f", "--force",
                         dest="force", default=False,
@@ -171,11 +171,11 @@ class App():
                         )
         # https://ttni.tech/mlinux/images/mtcdt/5.3.31/ttni-base-image-mtcdt-upgrade.bin
         group.add_argument("--image",
-                        dest="image_file", default="/tmp/ttni-base-image-{product_type}-upgrade.bin",
+                        dest="image_file", default=Constants.DEFAULT_MLINUX_IMAGE_PATTERN,
                         help="Path to mLinux image to be downloaded; use {product_type} to insert the product type dynamically. (Default: %(default)s)"
                         )
         group.add_argument("--reboot_time",
-                        dest="reboot_time", default=5*60,
+                        dest="reboot_time", default=Constants.DEFAULT_AEP_REBOOT_TIME_MAX,
                         type=int,
                         action="store",
                         help="How long to wait for reboots, in seconds (default %(default)s)."
