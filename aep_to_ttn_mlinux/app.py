@@ -89,7 +89,25 @@ class App():
     def _parse_arguments(self):
         parser = argparse.ArgumentParser(
             prog="aep_to_ttn_mlinux",
-            description="Set up and enable sshd on Conduit AEP using the configuration API"
+            description=
+                """
+                Download TTN mLinux to Conduit AEP using the commissioning API and ssh.
+
+                If the Conduit has not already been given an administrative login and
+                password, this script will set them (using the values of --username and
+                --password).
+
+                The script then uses the commissioning API to enable SSH (if not already enabled.)
+                When enabling ssh, a reboot is forced, and the script waits for the reboot
+                to complete.
+
+                Then the script uses ssh to download the appropriate image for the
+                Conduit being configured.
+
+                Finally, the script triggers a firmware update.
+
+                The script does not wait for the firmware update to complete.
+                """
             )
 
         #	Debugging
@@ -97,23 +115,23 @@ class App():
         group.add_argument("-d", "--debug",
                         dest="debug", default=False,
                         action='store_true',
-                        help="print debugging messages")
+                        help="Print debugging messages.")
         group.add_argument("--nodebug",
                         dest="debug",
                         action='store_false',
-                        help="do not print debugging messages")
+                        help="Do not print debugging messages.")
         group.add_argument("-v", "--verbose",
                         dest="verbose", default=False,
                         action='store_true',
-                        help="print verbose messages")
+                        help="Print verbose messages.")
         group.add_argument("-n", "--noop", "--dry-run",
                         dest="noop", default=False,
                         action='store_true',
-                        help="Don't make changes, just list what we are going to do")
+                        help="Don't make changes, just list what we are going to do.")
         parser.add_argument(
                         "--version",
                         action='version',
-                        help="Print version and exit",
+                        help="Print version and exit.",
                         version="%(prog)s v"+__version__
                         )
 
@@ -121,40 +139,46 @@ class App():
         group = parser.add_argument_group("Configuration options")
         group.add_argument("--username", "--user", "-U",
                         dest="username", default="mtadm",
-                        help="Username to use to connect (default %(default)s)")
+                        help="Username to use to connect (default %(default)s).")
         group.add_argument("--password", "--pass", "-P",
                         dest="password", required=True,
-                        help="Password to use to connect")
+                        help="Password to use to connect. There is no default; this must always be supplied.")
         group.add_argument("--address", "-A",
                         dest="address", default="192.168.2.1",
-                        help="IP address of the conduit being commissioned (default %(default)s)")
+                        help="IP address of the conduit being commissioned (default %(default)s).")
         group.add_argument("-f", "--force",
                         dest="force", default=False,
                         action='store_true',
-                        help="forcibly update the ssh setting and reboot, even if already set")
+                        help="Forcibly update the ssh settings and reboot the Conduit, even if already set.")
         group.add_argument("--skip-password", "-S",
                         dest="nopass", default=False,
                         action='store_true',
-                        help="Assume username and password are already set"
+                        help="Assume username and password are already set in the Conduit."
                         )
         group.add_argument("--product-type",
                         dest="product_type", default=None,
-                        help="default product type, normally mtcdt or mtcap; default: read from device"
+                        help="""
+                        Default product type, normally mtcdt or mtcap; default: read from device.
+                        If specified, and the discovered product type doesn't match, the script will abort.
+                        """
                         )
         group.add_argument("--product-id",
                         dest="product_id", default=None,
-                        help="full product ID, normally mctdt-l4n1-247a or similar; default: read from device"
+                        help="""
+                        Full product ID, normally mctdt-l4n1-247a or similar; default: read from device.
+                        If specified, and the discovered product ID doesn't match, the script will abort.
+                        """
                         )
         # https://ttni.tech/mlinux/images/mtcdt/5.3.31/ttni-base-image-mtcdt-upgrade.bin
         group.add_argument("--image",
                         dest="image_file", default="/tmp/ttni-base-image-{product_type}-upgrade.bin",
-                        help="path to image to be downloaded; use {product_type} to insert the product type dynamically. Default: %(default)s"
+                        help="Path to mLinux image to be downloaded; use {product_type} to insert the product type dynamically. (Default: %(default)s)"
                         )
         group.add_argument("--reboot_time",
                         dest="reboot_time", default=5*60,
                         type=int,
                         action="store",
-                        help="how long to wait for reboots, in seconds (default %(default)s)"
+                        help="How long to wait for reboots, in seconds (default %(default)s)."
                         )
 
         options = parser.parse_args()
