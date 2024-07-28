@@ -109,3 +109,50 @@ python3 -m pip install -r requirements.txt
 # make sure the script is functional
 python3 -m aep_to_ttn_mlinux --help
 ```
+
+## Run the script
+
+```bash
+# make sure you've activated the venv, then:
+python -m aep_to_ttn_linux --password choose-a-passw0rd --verbose
+```
+
+We normally use a different password than `choose-a-passw0rd`. Note that AEP wants a password containing lower case letters, digits, and punctuation.
+
+## Setting up VRFs to allow configuring gateways in parallel
+
+We relied on this [Redhat documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/reusing-the-same-ip-address-on-different-interfaces_configuring-and-managing-networking#temporarily-reusing-the-same-ip-address-on-different-interfaces_reusing-the-same-ip-address-on-different-interfaces) to help figure out how to do this.
+
+```bash
+# set up VRFs
+sudo ip link add vrf-usb1 type vrf table 10
+sudo ip link set dev vrf-usb1 up
+sudo route add table 10 unreacable default metric 4278198272
+sudo route add table 10 unreachable default metric 4278198272
+
+sudo ip link add vrf-usb2 type vrf table 11
+sudo ip link set dev vrf-usb2 up
+sudo ip route add table 10 unreachable default metric 4278198272
+sudo ip route add table 11 unreachable default metric 4278198272
+
+# .. and so forth.
+
+# then put each USB interface into its own VRF
+sudo ip link set dev enx000ec646174d master vrf-usb1
+# ...
+
+# show what is up (example).
+sudo ip -d link show master vrf-usb1
+sudo ip -d link show vrf vrf-usb1
+sudo ip neigh show vrf vrf-usb1
+sudo ip addr show vrf vrf-usb1
+
+# demo that we can't reach a Conduit normally
+ssh mtadm@192.168.2.1
+
+# demo that we *can* reach it with ip vrf exec
+sudo ip vrf exec vrf-usb1 ssh mtadm@192.168.2.1
+
+# run the provisioning script
+sudo ip vrf exec vrf-usb1 python -m aep_to_ttn_linux --password choose-a-passw0rd --verbose
+```
