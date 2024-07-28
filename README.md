@@ -30,7 +30,7 @@ cd /tmp
 # get the MTCDT images
 wget https://ttni.tech/mlinux/images/mtcdt/5.3.31/ttni-base-image-mtcdt-upgrade.bin
 # get the MTCAP image
-wget https://ttni.tech/mlinux/images/mtcap/5.3.31/ttni-base-image-mtcao-upgrade.bin
+wget https://ttni.tech/mlinux/images/mtcap/5.3.31/ttni-base-image-mtcap-upgrade.bin
 ```
 
 ### Networking connection
@@ -114,7 +114,7 @@ python3 -m aep_to_ttn_mlinux --help
 
 ```bash
 # make sure you've activated the venv, then:
-python -m aep_to_ttn_linux --password choose-a-passw0rd --verbose
+python -m aep_to_ttn_mlinux --password choose-a-passw0rd --verbose
 ```
 
 We normally use a different password than `choose-a-passw0rd`. Note that AEP wants a password containing lower case letters, digits, and punctuation.
@@ -154,5 +154,5 @@ ssh mtadm@192.168.2.1
 sudo ip vrf exec vrf-usb1 ssh mtadm@192.168.2.1
 
 # run the provisioning script
-sudo ip vrf exec vrf-usb1 python -m aep_to_ttn_linux --password choose-a-passw0rd --verbose
+sudo ip vrf exec vrf-usb1 python -m aep_to_ttn_mlinux --password choose-a-passw0rd --verbose
 ```
