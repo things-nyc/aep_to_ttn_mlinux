@@ -63,7 +63,7 @@ class App():
         self.logger = logger
 
         # verbose: report the version.
-        logger.info("commission_aep v%s", __version__)
+        logger.info("aep_to_ttn_mlinux v%s", __version__)
 
         self._initialize()
         logger.info("App is initialized")
@@ -88,7 +88,7 @@ class App():
 
     def _parse_arguments(self):
         parser = argparse.ArgumentParser(
-            prog="commission_aep",
+            prog="aep_to_ttn_mlinux",
             description="Set up and enable sshd on Conduit AEP using the configuration API"
             )
 
