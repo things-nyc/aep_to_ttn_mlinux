@@ -212,6 +212,10 @@ class App():
         if not commissioning:
             return True
 
+        commissioning_result = {}
+        if "result" in commissioning:
+            commissioning_result = commissioning["result"]
+
         # if disabled, give up.
         if options.noop:
             return True
@@ -225,16 +229,23 @@ class App():
         # set the username, set the password, then confirm the password.
         for password in ["", options.password, options.password]:
             data["aasAnswer"] = password
-            if "aasID" in commissioning:
-                data["aasID"] = commissioning["aasID"]
+
+            if "aasID" in commissioning_result:
+                data["aasID"] = commissioning_result["aasID"]
+
             commissioning = aep.set_commissioning(data)
             if not commissioning:
                 logger.warning("set_commissioning failed")
                 return False
+            logger.debug("set_commissioning result: %s", commissioning)
 
-            if "aasType" in commissioning:
-                aas_type = commissioning["aas_type"]
-                aas_msg = commissioning["aas_msg"]
+            commissioning_result = {}
+            if "result" in commissioning:
+                commissioning_result = commissioning["result"]
+
+            if "aasType" in commissioning_result:
+                aas_type = commissioning_result["aasType"]
+                aas_msg = commissioning_result["aasMsg"]
                 if aas_type == "error":
                     logger.error("commissioning error: %s", aas_msg)
                     return False
