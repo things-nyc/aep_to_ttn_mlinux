@@ -388,7 +388,7 @@ class App():
 
     # apply image
     def apply_image(self) -> bool:
-        self.logger.info("apply_image")
+        self.logger.info("apply_image: start the firmware update")
         return self.ssh.sudo(
                     "/usr/sbin/mlinux-firmware-upgrade /tmp/firmware.bin",
                     echo=True
@@ -405,7 +405,7 @@ class App():
             logger.info("ssh to %s is working", self.args.address)
             return True
         else:
-            logger.error("ssh to %s is not working", self.args.address)
+            logger.info("ssh to %s is not working", self.args.address)
             return False
 
     #############################
@@ -431,6 +431,7 @@ class App():
     def run(self) -> int:
         aep = self.aep
         options = self.args
+        logger = self.logger
 
         if not options.nopass:
             if not self.set_password():
@@ -440,6 +441,7 @@ class App():
             return 1
 
         if not self.check_ssh_enabled():
+            logger.info("AEP is rebooting to enable SSH; wait until SSH comes up. This takes a few minutes (normally two to three)")
             if not self.await_ssh_available(options.reboot_time):
                 return 1
 
