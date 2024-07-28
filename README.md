@@ -89,8 +89,9 @@ sudo ifconfig enx000ec646174d inet 192.168.2.200 netmask 255.255.255.0
 
 If you want to set up multiple gateways concurrently, you can do so using VRF; see below.
 
-## Running this script from a Python virtual environment
+## Set up this script from a Python virtual environment
 
+This is the recommended approach, as it doesn't require making any global environment changes other than installing python3.  We tested with Python 3.12.3.
 
 ```bash
 git clone git@github.com:things-nyc/aep_to_ttn_mlinux
