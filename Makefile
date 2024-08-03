@@ -36,6 +36,8 @@ help:
 		"* make help -- prints this message" \
 		"* make build -- builds the app (in dist)" \
 		"* make venv -- sets up the virtual env for development" \
+		"* make clean -- get rid of build artifacts" \
+		"* make distclean -- like clean, but also removes distribution directory" \
 		"" \
 		"On this system, virtual env scripts are in {envpath}/${VENV_SCRIPTS}"
 
@@ -69,5 +71,14 @@ venv:	.venv
 		"To activate in bash, say:" \
 		"    source .venv/${ACTIVATE}" \
 		""
+
+#
+# maintenance targets
+#
+clean:
+	rm -rf .buildenv .venv *.egg-info */__pycache__
+
+distclean:	clean
+	rm -rf dist
 
 #### end of file ####
