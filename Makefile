@@ -51,11 +51,11 @@ help:
 #
 .buildenv:
 	$(PYTHON) -m venv .buildenv
-	source .buildenv/$(ACTIVATE) && \
+	. .buildenv/$(ACTIVATE) && \
 		$(PYTHON_VENV) -m pip install build
 
 build:	.buildenv
-	source .buildenv/$(ACTIVATE) && $(PYTHON_VENV) -m build
+	. .buildenv/$(ACTIVATE) && $(PYTHON_VENV) -m build
 	@printf "%s\n" "distribution files are in the dist directory:" && ls dist
 
 #
@@ -65,14 +65,14 @@ build:	.buildenv
 #
 .venv:
 	$(PYTHON) -m venv .venv
-	source .venv/$(ACTIVATE) && $(PYTHON_VENV) -m pip install -r requirements.txt
+	. .venv/$(ACTIVATE) && $(PYTHON_VENV) -m pip install -r requirements.txt
 
 venv:	.venv
 	@printf "%s\n" \
 		"Virtual environment created in .venv." \
 		"" \
 		"To activate in bash, say:" \
-		"    source .venv/${ACTIVATE}" \
+		"    . .venv/${ACTIVATE}" \
 		""
 	@if [ "${PYTHON_VENV}" != "${PYTHON}" ]; then \
 		printf "%s\n" \
