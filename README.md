@@ -10,8 +10,8 @@
         - [Using the main Ethernet adapter](#using-the-main-ethernet-adapter)
         - [Using USB Adapters](#using-usb-adapters)
 - [Set up this script using a Python virtual environment](#set-up-this-script-using-a-python-virtual-environment)
-- [Run the script](#run-the-script)
-- [Setting up VRFs to allow configuring gateways in parallel](#setting-up-vrfs-to-allow-configuring-gateways-in-parallel)
+- [Set up an AEP Conduit](#set-up-an-aep-conduit)
+- [Appendix: Setting up VRFs to allow configuring gateways in parallel](#appendix-setting-up-vrfs-to-allow-configuring-gateways-in-parallel)
 
 <!-- /TOC -->
 
@@ -305,9 +305,13 @@ Configuration options:
                         600).
 ```
 
-## Run the script
+## Set up an AEP Conduit
 
-Boot up the AEP gateway, and connect its networking port to your Ethernet adapter.
+Repeat this section for each gateway you wish to configure.
+
+Boot up the AEP gateway, and connect its networking port directly to your Ethernet adapter.
+
+Wait for boot up to finish, otherwise the next command is going to fail. (You can tell it's done just by running the script and watching for success; or by watching the status lights. On "blue box" Conduits you can also connect to the serial console and watch it boot up.)
 
 ```bash
 # make sure you've activated the venv, then:
@@ -318,20 +322,21 @@ We normally use a different password than `choose-a-passw0rd`. Note that AEP wan
 
 If the Conduit has not already been given an administrative login and password, this script will set them (using the values of `--username` and `--password`).
 
-The script then uses the commissioning API to enable SSH (if not already enabled.)
-When enabling ssh, a reboot is forced, and the script waits for the reboot
-to complete.
+However, if the AEP Conduit *has* already been given an administrative login and password (for example via web UI or by running a manual provisioning procedure), the values given on the command line must match the values that have been set in the Conduit. (Under some circumstances, if an SSH key has already been loaded into the Conduit, the password won't be used, but best to keep things matched up.)
 
-Then the script uses ssh to download the appropriate image for the
-Conduit being configured.
+The script then uses the AEP commissioning API to enable SSH (if not already enabled.) When enabling ssh, a reboot is forced, and the script waits for the reboot to complete.
 
-Finally, the script triggers a firmware update.
+Then the script uses ssh to download the appropriate mLinux image for the Conduit being configured.
+
+Finally, the script triggers a firmware update, which changes the Conduit from an "AES Conduit" to an "mLinux Conduit". After the reboot, the "AES Conduit" login info is lost, but you instead can use the TTN NY "mLinux Conduit" login and password.
 
 The script does not wait for the firmware update to complete.
 
 Thus, you'll normally observe two reboots of the Conduit -- the first time to enable SSH, and the second time to do the firmware update.
 
-## Setting up VRFs to allow configuring gateways in parallel
+## Appendix: Setting up VRFs to allow configuring gateways in parallel
+
+This is really advanced, and if you don't understand this section, you can safely ignore it.
 
 We relied on this [Redhat documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/reusing-the-same-ip-address-on-different-interfaces_configuring-and-managing-networking#temporarily-reusing-the-same-ip-address-on-different-interfaces_reusing-the-same-ip-address-on-different-interfaces) to help figure out how to do this.
 
@@ -366,5 +371,5 @@ ssh mtadm@192.168.2.1
 sudo ip vrf exec vrf-usb1 ssh mtadm@192.168.2.1
 
 # run the provisioning script
-sudo ip vrf exec vrf-usb1 python -m aep_to_ttn_mlinux --password choose-a-passw0rd --verbose
+sudo ip vrf exec vrf-usb1 . .venv/scripts/activate '&&' python -m aep_to_ttn_mlinux --password choose-a-passw0rd --verbose
 ```
